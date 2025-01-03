@@ -64,7 +64,7 @@ int main() {
 
     // echo command
     if (strcmp(command.name, "echo") == 0) {
-      for (size_t i = 0; i < command.narg; i++) {
+      for (size_t i = 0; i < command.narg-1; i++) {
         if (i > 0) {
           printf(" ");
         }
