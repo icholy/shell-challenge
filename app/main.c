@@ -22,6 +22,11 @@ int main() {
       *nl_index = 0;
     }
 
+    // exit command
+    if (strcmp("exit 0", input)) {
+      exit(0);
+    }
+
     // print error
     printf("%s: command not found\n", input);
   }
