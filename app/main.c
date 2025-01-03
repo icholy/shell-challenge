@@ -23,7 +23,7 @@ int main() {
     }
 
     // exit command
-    if (strcmp("exit 0", input) != 0) {
+    if (strcmp("exit 0", input) == 0) {
       exit(0);
     }
 
