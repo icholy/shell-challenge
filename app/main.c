@@ -20,8 +20,8 @@ struct EnvPath {
 };
 
 int env_path_parse(struct EnvPath *env_path, const char* input);
-
 int env_path_find(struct EnvPath *env_path, const char* name, char *path);
+int env_path_print(struct EnvPath *env_path);
 
 int main() {
   // Flush after every printf
@@ -144,5 +144,12 @@ int env_path_parse(struct EnvPath *env_path, const char *input) {
     n_paths++;
   }
   env_path->n_paths = n_paths;
+  return 0;
+}
+
+int env_path_print(struct EnvPath *env_path) {
+  for (size_t i = 0; i < env_path->n_paths; i++) {
+    printf("%s\n", env_path->paths[i]);
+  }
   return 0;
 }
