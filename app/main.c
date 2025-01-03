@@ -13,6 +13,7 @@ struct Command {
 };
 
 int command_parse(struct Command *command, char *input);
+int command_print(struct Command *command);
 const char *command_arg(struct Command *command, size_t n);
 
 int is_builtin(const char *name);
@@ -65,6 +66,12 @@ int main() {
     // echo command
     if (strcmp(command.name, "echo") == 0) {
       puts(command.args);
+      continue;
+    }
+
+    // debug command
+    if (strcmp(command.name, "debug") == 0) {
+      command_print(&command);
       continue;
     }
 
@@ -144,6 +151,15 @@ int command_parse(struct Command *command, char *input) {
   command->args = args;
   command->narg = narg;
 
+  return 0;
+}
+
+int command_print(struct Command *command) {
+  printf("Command: %s\n", command->name);
+  printf("Args:\n");
+  for (size_t i = 0; i < command->narg; i++) {
+    printf("- %s\n", command->argv[i]);
+  }
   return 0;
 }
 
