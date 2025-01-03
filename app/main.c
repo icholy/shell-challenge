@@ -12,7 +12,9 @@ int main() {
 
     // Wait for user input
     char input[100];
-    fgets(input, 100, stdin);
+    if (fgets(input, 100, stdin) == NULL) {
+      break;
+    }
 
     // remove trailing newline
     char *nl_index = strstr(input, "\n");
