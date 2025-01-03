@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 struct Command {
-  const char *name;
-  const char *args;
-  const char *argv[100];
+  char *name;
+  char *args;
+  char *argv[100];
   size_t narg;
 };
 
@@ -85,7 +86,7 @@ int main() {
 
     char bin_path[4096];
     if (env_path_find(&env_path, command.name, bin_path) == 0) {
-      printf("running %s %s\n", command.name, command.args);
+      execve(bin_path, command.argv, NULL);
       continue;
     }
 
