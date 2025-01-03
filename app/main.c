@@ -65,7 +65,13 @@ int main() {
 
     // echo command
     if (strcmp(command.name, "echo") == 0) {
-      puts(command.args);
+      for (size_t i = 0; i < command.narg; i++) {
+        if (i > 0) {
+          printf(" ");
+        }
+        printf("%s", command_arg(&command, i));
+      }
+      puts("");
       continue;
     }
 
