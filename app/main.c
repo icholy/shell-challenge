@@ -80,6 +80,12 @@ int main() {
       continue;
     }
 
+    char bin_path[4096];
+    if (env_path_find(&env_path, command.name, bin_path) == 0) {
+      printf("running %s %s\n", command.name, command.args);
+      continue;
+    }
+
     // print error
     printf("%s: command not found\n", command.name);
   }
