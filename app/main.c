@@ -1,3 +1,4 @@
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -130,7 +131,20 @@ int is_builtin(const char *name) {
   return 0;
 }
 
-int env_path_find(struct EnvPath *env_path, const char *name, char *path) {
+int env_path_find(struct EnvPath *env_path, const char *name, char *dest) {
+  for (size_t i = 0; i < env_path->n_paths; i++) {
+    strcpy(dest, env_path->paths[i]);
+    size_t len = strlen(dest);
+    if (dest[len-1] != '/') {
+      dest[len] = '/';
+      dest[len+1] = 0;
+    }
+    strcat(dest, name);
+    struct stat tmp;
+    if (stat(dest, &tmp) == 0) {
+      return 0;
+    }
+  }
   return 1;
 }
 
