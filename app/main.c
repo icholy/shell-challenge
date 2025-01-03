@@ -41,6 +41,24 @@ int main() {
       continue;
     }
 
+    // type command
+    if (strcmp(command.name, "type") == 0) {
+      if (strcmp(command.args, "exit") == 0) {
+        printf("%s is a shell builtin\n", command.args);
+        continue;
+      }
+      if (strcmp(command.args, "echo") == 0) {
+        printf("%s is a shell builtin\n", command.args);
+        continue;
+      }
+      if (strcmp(command.args, "type") == 0) {
+        printf("%s is a shell builtin\n", command.args);
+        continue;
+      }
+      printf("%s: not found\n", command.args);
+      continue;
+    }
+
     // print error
     printf("%s: command not found\n", command.name);
   }
