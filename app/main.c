@@ -3,11 +3,13 @@
 #include <string.h>
 
 struct Command {
-  const char* name;
-  const char* args;
+  const char *name;
+  const char *args;
 };
 
 int command_parse(char *input, struct Command *command);
+
+int is_builtin(const char *name);
 
 int main() {
   // Flush after every printf
@@ -43,15 +45,7 @@ int main() {
 
     // type command
     if (strcmp(command.name, "type") == 0) {
-      if (strcmp(command.args, "exit") == 0) {
-        printf("%s is a shell builtin\n", command.args);
-        continue;
-      }
-      if (strcmp(command.args, "echo") == 0) {
-        printf("%s is a shell builtin\n", command.args);
-        continue;
-      }
-      if (strcmp(command.args, "type") == 0) {
+      if (is_builtin(command.args)) {
         printf("%s is a shell builtin\n", command.args);
         continue;
       }
@@ -94,5 +88,18 @@ int command_parse(char *input, struct Command *command) {
   command->name = input;
   command->args = args;
 
+  return 0;
+}
+
+int is_builtin(const char *name) {
+  if (strcmp(name, "exit") == 0) {
+    return 1;
+  }
+  if (strcmp(name, "echo") == 0) {
+    return 1;
+  }
+  if (strcmp(name, "type") == 0) {
+    return 1;
+  }
   return 0;
 }
