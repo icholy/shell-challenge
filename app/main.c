@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 struct Command {
   char *name;
@@ -90,9 +90,10 @@ int main() {
       pid_t child = fork();
       if (child) {
         waitpid(child, NULL, 0);
-      }
-      if (execve(bin_path, command.argv, NULL) != 0) {
-        printf("failed to execute: %s %s\n", command.name, command.args);
+      } else {
+        if (execve(bin_path, command.argv, NULL) != 0) {
+          printf("failed to execute: %s %s\n", command.name, command.args);
+        }
       }
       continue;
     }
