@@ -7,7 +7,6 @@
 
 struct Command {
   char *name;
-  char *args;
   char *argv[100];
   size_t narg;
 };
@@ -84,17 +83,17 @@ int main() {
     // type command
     if (strcmp(command.name, "type") == 0) {
       if (is_builtin(command_arg(&command, 0))) {
-        printf("%s is a shell builtin\n", command.args);
+        printf("%s is a shell builtin\n", command_arg(&command, 0));
         continue;
       }
 
       char bin_path[4096];
       if (env_path_find(&env_path, command_arg(&command, 0), bin_path) == 0) {
-        printf("%s is %s\n", command.args, bin_path);
+        printf("%s is %s\n", command_arg(&command, 0), bin_path);
         continue;
       }
 
-      printf("%s: not found\n", command.args);
+      printf("%s: not found\n", command_arg(&command, 0));
       continue;
     }
 
@@ -105,7 +104,7 @@ int main() {
         waitpid(child, NULL, 0);
       } else {
         if (execve(bin_path, command.argv, NULL) != 0) {
-          printf("failed to execute: %s %s\n", command.name, command.args);
+          printf("failed to execute: %s\n", command.name);
         }
       }
       continue;
@@ -129,23 +128,11 @@ int command_parse(struct Command *command, char *input) {
     *end = 0;
   }
 
-  // replace space with null terminator
-  char *space = strchr(input, ' ');
-  if (space != NULL) {
-    *space = 0;
-  }
-
-  // find the beginning of the args
-  char *args;
-  if (space != NULL) {
-    args = space + 1;
-  } else {
-    args = input + strlen(input);
-  }
-
-  // tokenize the args
   size_t narg = 0;
-  char *token = strtok(args, " ");
+  char *token = strtok(input, " ");
+
+  command->name = token;
+
   while (token != NULL) {
     command->argv[narg] = token;
     narg++;
@@ -154,7 +141,6 @@ int command_parse(struct Command *command, char *input) {
   command->argv[narg] = NULL;
 
   command->name = input;
-  command->args = args;
   command->narg = narg;
 
   return 0;
@@ -170,7 +156,8 @@ int command_print(struct Command *command) {
 }
 
 const char *command_arg(struct Command *command, size_t n) {
-  if (n >= command->narg || n < 0) {
+  n++;
+  if (n >= command->narg || n <= 0) {
     return "";
   }
   return command->argv[n];
