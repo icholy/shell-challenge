@@ -121,6 +121,7 @@ int command_parse(struct Command *command, char *input) {
     args = input + strlen(input);
   }
 
+  // tokenize the args
   size_t narg = 0;
   char *token = strtok(args, " ");
   while (token != NULL) {
