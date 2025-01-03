@@ -71,7 +71,7 @@ int main() {
         }
         printf("%s", command_arg(&command, i));
       }
-      puts("");
+      printf("\n");
       continue;
     }
 
