@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 struct Command {
   char *name;
@@ -86,6 +87,10 @@ int main() {
 
     char bin_path[4096];
     if (env_path_find(&env_path, command.name, bin_path) == 0) {
+      pid_t child = fork();
+      if (child) {
+        waitpid(child, NULL, 0);
+      }
       execve(bin_path, command.argv, NULL);
       continue;
     }
@@ -130,6 +135,7 @@ int command_parse(struct Command *command, char *input) {
     narg++;
     token = strtok(NULL, " ");
   }
+  command->argv[narg] = NULL;
 
   command->name = input;
   command->args = args;
