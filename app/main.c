@@ -11,9 +11,28 @@ int command_parse(char *input, struct Command *command);
 
 int is_builtin(const char *name);
 
+const size_t PATH_MAX = 4096;
+
+struct EnvPath {
+  char raw[4095];
+  char *paths[100];
+  size_t n_paths;
+};
+
+int env_path_parse(struct EnvPath *env_path, const char* input);
+
+int env_path_find(struct EnvPath *env_path, const char* name, char *path);
+
 int main() {
   // Flush after every printf
   setbuf(stdout, NULL);
+
+  // parse the PATH
+  struct EnvPath env_path;
+  if (env_path_parse(&env_path, getenv("PATH")) != 0) {
+    fprintf(stderr, "failed to parse PATH\n");
+    exit(1);
+  }
 
   while (1) {
     // Uncomment this block to pass the first stage
@@ -49,6 +68,13 @@ int main() {
         printf("%s is a shell builtin\n", command.args);
         continue;
       }
+
+      char bin_path[4096];
+      if (env_path_find(&env_path, command.args, bin_path) == 0) {
+        printf("%s is %s\n", command.args, bin_path);
+        continue;
+      }
+
       printf("%s: not found\n", command.args);
       continue;
     }
@@ -101,5 +127,22 @@ int is_builtin(const char *name) {
   if (strcmp(name, "type") == 0) {
     return 1;
   }
+  return 0;
+}
+
+int env_path_find(struct EnvPath *env_path, const char *name, char *path) {
+  return 1;
+}
+
+int env_path_parse(struct EnvPath *env_path, const char *input) {
+  strncpy(env_path->raw, input, PATH_MAX);
+  char *token = strtok(env_path->raw, ":");
+  size_t n_paths = 0;
+  while (token != NULL && n_paths <= PATH_MAX) {
+    env_path->paths[n_paths] = token;
+    token = strtok(NULL, ":");
+    n_paths++;
+  }
+  env_path->n_paths = n_paths;
   return 0;
 }
