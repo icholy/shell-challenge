@@ -1,14 +1,17 @@
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 struct Command {
   const char *name;
   const char *args;
+  const char *argv[100];
+  size_t narg;
 };
 
-int command_parse(char *input, struct Command *command);
+int command_parse(struct Command *command, char *input);
+const char *command_arg(struct Command *command, size_t n);
 
 int is_builtin(const char *name);
 
@@ -20,8 +23,8 @@ struct EnvPath {
   size_t n_paths;
 };
 
-int env_path_parse(struct EnvPath *env_path, const char* input);
-int env_path_find(struct EnvPath *env_path, const char* name, char *path);
+int env_path_parse(struct EnvPath *env_path, const char *input);
+int env_path_find(struct EnvPath *env_path, const char *name, char *path);
 int env_path_print(struct EnvPath *env_path);
 
 int main() {
@@ -47,9 +50,9 @@ int main() {
 
     // parse the command
     struct Command command;
-    if (command_parse(input, &command) != 0) {
+    if (command_parse(&command, input) != 0) {
       fprintf(stderr, "failed to parse command\n");
-      exit(1);
+      continue;
     }
 
     // exit command
@@ -65,13 +68,13 @@ int main() {
 
     // type command
     if (strcmp(command.name, "type") == 0) {
-      if (is_builtin(command.args)) {
+      if (is_builtin(command_arg(&command, 0))) {
         printf("%s is a shell builtin\n", command.args);
         continue;
       }
 
       char bin_path[4096];
-      if (env_path_find(&env_path, command.args, bin_path) == 0) {
+      if (env_path_find(&env_path, command_arg(&command, 0), bin_path) == 0) {
         printf("%s is %s\n", command.args, bin_path);
         continue;
       }
@@ -97,7 +100,7 @@ int main() {
  * Parse a space separate command line.
  * This function modifies the input string.
  */
-int command_parse(char *input, struct Command *command) {
+int command_parse(struct Command *command, char *input) {
   // remove trailing newline
   char *end = strchr(input, '\n');
   if (end != NULL) {
@@ -118,10 +121,26 @@ int command_parse(char *input, struct Command *command) {
     args = input + strlen(input);
   }
 
+  size_t narg = 0;
+  char *token = strtok(args, " ");
+  while (token != NULL) {
+    command->argv[narg] = token;
+    narg++;
+    token = strtok(NULL, " ");
+  }
+
   command->name = input;
   command->args = args;
+  command->narg = narg;
 
   return 0;
+}
+
+const char *command_arg(struct Command *command, size_t n) {
+  if (n >= command->narg || n < 0) {
+    return "";
+  }
+  return command->argv[n];
 }
 
 int is_builtin(const char *name) {
@@ -141,9 +160,9 @@ int env_path_find(struct EnvPath *env_path, const char *name, char *dest) {
   for (size_t i = 0; i < env_path->n_paths; i++) {
     strcpy(dest, env_path->paths[i]);
     size_t len = strlen(dest);
-    if (dest[len-1] != '/') {
+    if (dest[len - 1] != '/') {
       dest[len] = '/';
-      dest[len+1] = 0;
+      dest[len + 1] = 0;
     }
     strcat(dest, name);
     struct stat tmp;
