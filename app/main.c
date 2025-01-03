@@ -35,6 +35,12 @@ int main() {
       exit(0);
     }
 
+    // echo command
+    if (strcmp(command.name, "echo") == 0) {
+      puts(command.args);
+      continue;
+    }
+
     // print error
     printf("%s: command not found\n", command.name);
   }
@@ -56,7 +62,7 @@ int command_parse(char *input, struct Command *command) {
   // replace space with null terminator
   char *space = strchr(input, ' ');
   if (space != NULL) {
-    space = 0;
+    *space = 0;
   }
 
   // find the beginning of the args
