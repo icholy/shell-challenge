@@ -91,7 +91,9 @@ int main() {
       if (child) {
         waitpid(child, NULL, 0);
       }
-      execve(bin_path, command.argv, NULL);
+      if (execve(bin_path, command.argv, NULL) != 0) {
+        printf("failed to execute: %s %s\n", command.name, command.args);
+      }
       continue;
     }
 
