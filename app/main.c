@@ -105,6 +105,14 @@ int main() {
       continue;
     }
 
+    // cd command
+    if (strcmp(command.name, "cd") == 0)  {
+      if (chdir(command_arg(&command, 0)) != 0) {
+        printf("failed to change directory\n");
+      }
+      continue;;
+    }
+
     char bin_path[4096];
     if (env_path_find(&env_path, command.name, bin_path) == 0) {
       pid_t child = fork();
@@ -182,6 +190,9 @@ int is_builtin(const char *name) {
     return 1;
   }
   if (strcmp(name, "pwd") == 0) {
+    return 1;
+  }
+  if (strcmp(name, "cd") == 0) {
     return 1;
   }
   return 0;
