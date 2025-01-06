@@ -181,6 +181,9 @@ int is_builtin(const char *name) {
   if (strcmp(name, "type") == 0) {
     return 1;
   }
+  if (strcmp(name, "pwd") == 0) {
+    return 1;
+  }
   return 0;
 }
 
