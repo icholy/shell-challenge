@@ -107,8 +107,9 @@ int main() {
 
     // cd command
     if (strcmp(command.name, "cd") == 0)  {
-      if (chdir(command_arg(&command, 0)) != 0) {
-        printf("failed to change directory\n");
+      const char *dir = command_arg(&command, 0);
+      if (chdir(dir) != 0) {
+        printf("cd: %s: No such file or directory\n", dir);
       }
       continue;;
     }
