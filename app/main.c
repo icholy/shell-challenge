@@ -3,7 +3,9 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 #include <unistd.h>
+#include <pwd.h>
 
 struct Command {
   char *name;
@@ -28,6 +30,8 @@ struct EnvPath {
 int env_path_parse(struct EnvPath *env_path, const char *input);
 int env_path_find(struct EnvPath *env_path, const char *name, char *path);
 int env_path_print(struct EnvPath *env_path);
+
+const char* gethomedir();
 
 int main() {
   // Flush after every printf
@@ -108,6 +112,9 @@ int main() {
     // cd command
     if (strcmp(command.name, "cd") == 0)  {
       const char *dir = command_arg(&command, 0);
+      if (strcmp(dir, "~") == 0) {
+        dir = gethomedir();
+      }
       if (chdir(dir) != 0) {
         printf("cd: %s: No such file or directory\n", dir);
       }
@@ -235,3 +242,12 @@ int env_path_print(struct EnvPath *env_path) {
   }
   return 0;
 }
+
+const char* gethomedir() {
+  const char* dir = getenv("HOME");
+  if (dir == NULL) {
+    dir = getpwuid(getuid())->pw_dir;
+  }
+  return dir;
+}
+
