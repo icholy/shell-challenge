@@ -97,6 +97,14 @@ int main() {
       continue;
     }
 
+    // cwd command
+    if (strcmp(command.name, "pwd") == 0) {
+      char buf[PATH_MAX];
+      char *cwd = getcwd(buf, PATH_MAX);
+      printf("%s\n", cwd);
+      continue;
+    }
+
     char bin_path[4096];
     if (env_path_find(&env_path, command.name, bin_path) == 0) {
       pid_t child = fork();
