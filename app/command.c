@@ -17,12 +17,6 @@ int command_parser_init(struct CommandParser *parser, char *input) {
   return 0;
 }
 
-int is_digit(char c) { return '0' <= c && c <= '9'; }
-
-int is_alpha(char c) {
-  return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
-}
-
 int is_space(char c) {
   switch (c) {
   case ' ':
@@ -32,13 +26,6 @@ int is_space(char c) {
   default:
     return 0;
   }
-}
-
-int is_ident(char c) {
-  if (is_space(c)) {
-    return 0;
-  }
-  return is_digit(c) || is_alpha(c);
 }
 
 void command_parser_inc(struct CommandParser *parser) {
