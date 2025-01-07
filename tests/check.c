@@ -25,10 +25,12 @@ END_TEST
 
 START_TEST(command_parse_single_quote) {
   struct Command command;
-  char *input = strdup("echo 'hello world'");
+  char *input = strdup("echo 'hello world' ''");
   command_parse(&command, input);
+  ck_assert_int_eq(command.narg, 3);
   ck_assert_str_eq(command.name, "echo");
   ck_assert_str_eq(command_arg(&command, 0), "hello world");
+  ck_assert_str_eq(command_arg(&command, 1), "");
   free(input);
 }
 END_TEST
