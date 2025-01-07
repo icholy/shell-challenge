@@ -2,6 +2,13 @@
 #include <stdio.h>
 #include <string.h>
 
+struct CommandParser {
+  char *input;
+  size_t offset;
+  char next;
+  char *arg;
+};
+
 int command_parser_init(struct CommandParser *parser, char *input) {
   parser->offset = 0;
   parser->input = input;
