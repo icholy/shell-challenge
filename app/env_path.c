@@ -1,9 +1,9 @@
+#include "shared.h"
 #include "env_path.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <linux/limits.h>
 
 int env_path_find(struct EnvPath *env_path, const char *name, char *dest) {
   for (size_t i = 0; i < env_path->n_paths; i++) {

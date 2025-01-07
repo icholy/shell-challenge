@@ -1,6 +1,6 @@
 #include "env_path.h"
 #include "command.h"
-#include <linux/limits.h>
+#include "shared.h"
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
