@@ -33,6 +33,8 @@ void command_parser_inc(struct CommandParser *parser) {
   parser->next = parser->input[parser->offset];
 }
 
+// TODO: single quoted strings are concatonated into a single arg (without the args).
+//       this means we can't point back into the original strings like we're doing now.
 int command_parser_next(struct CommandParser *parser) {
   // skip whitespace
   while (is_space(parser->next)) {
