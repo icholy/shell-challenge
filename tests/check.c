@@ -12,16 +12,14 @@ START_TEST (env_path_parse_test)
 }
 END_TEST
 
-Suite * env_path_suite(void)
+Suite * test_suite(void)
 {
 	Suite *s;
 	TCase *tc_env_path;
 
-	s = suite_create("EnvPath");
+	s = suite_create("Shell");
 
-	/* Core test case */
-	tc_env_path = tcase_create("Core");
-
+	tc_env_path = tcase_create("EnvPath");
 	tcase_add_test(tc_env_path, env_path_parse_test);
 	suite_add_tcase(s, tc_env_path);
 
@@ -34,7 +32,7 @@ int main(void)
 	Suite *s;
 	SRunner *sr;
 
-	s = env_path_suite();
+	s = test_suite();
 	sr = srunner_create(s);
 
 	srunner_run_all(sr, CK_NORMAL);
