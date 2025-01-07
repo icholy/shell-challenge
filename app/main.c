@@ -1,11 +1,13 @@
+#include "env_path.h"
+#include <linux/limits.h>
+#include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
-#include <pwd.h>
 
 struct Command {
   char *name;
@@ -19,19 +21,7 @@ const char *command_arg(struct Command *command, size_t n);
 
 int is_builtin(const char *name);
 
-const size_t PATH_MAX = 4096;
-
-struct EnvPath {
-  char raw[4095];
-  char *paths[100];
-  size_t n_paths;
-};
-
-int env_path_parse(struct EnvPath *env_path, const char *input);
-int env_path_find(struct EnvPath *env_path, const char *name, char *path);
-int env_path_print(struct EnvPath *env_path);
-
-const char* gethomedir();
+const char *gethomedir();
 
 int main() {
   // Flush after every printf
@@ -68,7 +58,7 @@ int main() {
 
     // echo command
     if (strcmp(command.name, "echo") == 0) {
-      for (size_t i = 0; i < command.narg-1; i++) {
+      for (size_t i = 0; i < command.narg - 1; i++) {
         if (i > 0) {
           printf(" ");
         }
@@ -110,7 +100,7 @@ int main() {
     }
 
     // cd command
-    if (strcmp(command.name, "cd") == 0)  {
+    if (strcmp(command.name, "cd") == 0) {
       const char *dir = command_arg(&command, 0);
       if (strcmp(dir, "~") == 0) {
         dir = gethomedir();
@@ -118,7 +108,8 @@ int main() {
       if (chdir(dir) != 0) {
         printf("cd: %s: No such file or directory\n", dir);
       }
-      continue;;
+      continue;
+      ;
     }
 
     char bin_path[4096];
@@ -206,48 +197,10 @@ int is_builtin(const char *name) {
   return 0;
 }
 
-int env_path_find(struct EnvPath *env_path, const char *name, char *dest) {
-  for (size_t i = 0; i < env_path->n_paths; i++) {
-    strcpy(dest, env_path->paths[i]);
-    size_t len = strlen(dest);
-    if (dest[len - 1] != '/') {
-      dest[len] = '/';
-      dest[len + 1] = 0;
-    }
-    strcat(dest, name);
-    struct stat tmp;
-    if (stat(dest, &tmp) == 0) {
-      return 0;
-    }
-  }
-  return 1;
-}
-
-int env_path_parse(struct EnvPath *env_path, const char *input) {
-  strncpy(env_path->raw, input, PATH_MAX);
-  char *token = strtok(env_path->raw, ":");
-  size_t n_paths = 0;
-  while (token != NULL && n_paths <= PATH_MAX) {
-    env_path->paths[n_paths] = token;
-    token = strtok(NULL, ":");
-    n_paths++;
-  }
-  env_path->n_paths = n_paths;
-  return 0;
-}
-
-int env_path_print(struct EnvPath *env_path) {
-  for (size_t i = 0; i < env_path->n_paths; i++) {
-    printf("%s\n", env_path->paths[i]);
-  }
-  return 0;
-}
-
-const char* gethomedir() {
-  const char* dir = getenv("HOME");
+const char *gethomedir() {
+  const char *dir = getenv("HOME");
   if (dir == NULL) {
     dir = getpwuid(getuid())->pw_dir;
   }
   return dir;
 }
-
