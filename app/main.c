@@ -1,4 +1,5 @@
 #include "env_path.h"
+#include "command.h"
 #include <linux/limits.h>
 #include <pwd.h>
 #include <stdio.h>
@@ -9,19 +10,32 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-struct Command {
-  char *name;
-  char *argv[100];
-  size_t narg;
-};
+const char *gethomedir() {
+  const char *dir = getenv("HOME");
+  if (dir == NULL) {
+    dir = getpwuid(getuid())->pw_dir;
+  }
+  return dir;
+}
 
-int command_parse(struct Command *command, char *input);
-int command_print(struct Command *command);
-const char *command_arg(struct Command *command, size_t n);
-
-int is_builtin(const char *name);
-
-const char *gethomedir();
+int is_builtin(const char *name) {
+  if (strcmp(name, "exit") == 0) {
+    return 1;
+  }
+  if (strcmp(name, "echo") == 0) {
+    return 1;
+  }
+  if (strcmp(name, "type") == 0) {
+    return 1;
+  }
+  if (strcmp(name, "pwd") == 0) {
+    return 1;
+  }
+  if (strcmp(name, "cd") == 0) {
+    return 1;
+  }
+  return 0;
+}
 
 int main() {
   // Flush after every printf
@@ -130,77 +144,4 @@ int main() {
   }
 
   return 0;
-}
-
-/**
- * Parse a space separate command line.
- * This function modifies the input string.
- */
-int command_parse(struct Command *command, char *input) {
-  // remove trailing newline
-  char *end = strchr(input, '\n');
-  if (end != NULL) {
-    *end = 0;
-  }
-
-  size_t narg = 0;
-  char *token = strtok(input, " ");
-
-  command->name = token;
-
-  while (token != NULL) {
-    command->argv[narg] = token;
-    narg++;
-    token = strtok(NULL, " ");
-  }
-  command->argv[narg] = NULL;
-
-  command->name = input;
-  command->narg = narg;
-
-  return 0;
-}
-
-int command_print(struct Command *command) {
-  printf("Command: %s\n", command->name);
-  printf("Args:\n");
-  for (size_t i = 1; i < command->narg; i++) {
-    printf("- %s\n", command->argv[i]);
-  }
-  return 0;
-}
-
-const char *command_arg(struct Command *command, size_t n) {
-  n++;
-  if (n >= command->narg || n <= 0) {
-    return "";
-  }
-  return command->argv[n];
-}
-
-int is_builtin(const char *name) {
-  if (strcmp(name, "exit") == 0) {
-    return 1;
-  }
-  if (strcmp(name, "echo") == 0) {
-    return 1;
-  }
-  if (strcmp(name, "type") == 0) {
-    return 1;
-  }
-  if (strcmp(name, "pwd") == 0) {
-    return 1;
-  }
-  if (strcmp(name, "cd") == 0) {
-    return 1;
-  }
-  return 0;
-}
-
-const char *gethomedir() {
-  const char *dir = getenv("HOME");
-  if (dir == NULL) {
-    dir = getpwuid(getuid())->pw_dir;
-  }
-  return dir;
 }
