@@ -1,6 +1,8 @@
 #include "../app/env_path.h"
+#include "../app/command.h"
 #include <check.h>
 #include <stdlib.h>
+#include <string.h>
 
 START_TEST (env_path_parse_test)
 {
@@ -12,31 +14,37 @@ START_TEST (env_path_parse_test)
 }
 END_TEST
 
-Suite * test_suite(void)
+START_TEST (command_parse_simple)
 {
-	Suite *s;
-	TCase *tc_env_path;
+	struct Command command;
+	char *input = strdup("cd /tmp");
+	command_parse(&command, input);
+	ck_assert_str_eq(command.name, "cd");
+	ck_assert_str_eq(command_arg(&command, 0), "/tmp");
+	free(input);
+}
+END_TEST
 
-	s = suite_create("Shell");
+Suite * test_suite(void) {
+	Suite *s = suite_create("Shell");
 
-	tc_env_path = tcase_create("EnvPath");
+	TCase *tc_env_path = tcase_create("EnvPath");
 	tcase_add_test(tc_env_path, env_path_parse_test);
 	suite_add_tcase(s, tc_env_path);
+
+	TCase *tc_command = tcase_create("Command");
+    tcase_add_test(tc_command, command_parse_simple);
+    suite_add_tcase(s, tc_command);
 
 	return s;
 }
 
-int main(void)
-{
-	int number_failed;
-	Suite *s;
-	SRunner *sr;
-
-	s = test_suite();
-	sr = srunner_create(s);
+int main(void) {
+	Suite *s = test_suite();
+	SRunner * sr = srunner_create(s);
 
 	srunner_run_all(sr, CK_NORMAL);
-	number_failed = srunner_ntests_failed(sr);
+	int number_failed = srunner_ntests_failed(sr);
 	srunner_free(sr);
 	return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
