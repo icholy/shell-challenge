@@ -27,10 +27,11 @@ START_TEST(command_parse_single_quote) {
   struct Command command;
   char *input = strdup("echo 'script     example' 'world''test'");
   command_parse(&command, input);
-  ck_assert_int_eq(command.narg, 3);
+  ck_assert_int_eq(command.narg, 4);
   ck_assert_str_eq(command.name, "echo");
   ck_assert_str_eq(command_arg(&command, 0), "script     example");
-  ck_assert_str_eq(command_arg(&command, 1), "worldtest");
+  ck_assert_str_eq(command_arg(&command, 1), "world");
+  ck_assert_str_eq(command_arg(&command, 2), "test");
   free(input);
 }
 END_TEST
