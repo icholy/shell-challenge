@@ -1,19 +1,26 @@
 #include "command.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 struct CommandParser {
+  char *next;
   char *input;
-  size_t offset;
-  char next;
+  char *output;
   char *arg;
 };
 
 int command_parser_init(struct CommandParser *parser, char *input) {
-  parser->offset = 0;
-  parser->input = input;
+  parser->input = strdup(input);
+  parser->next = parser->input;
+  parser->output = input;
   parser->arg = NULL;
-  parser->next = input[0];
+  return 0;
+}
+
+int command_parser_free(struct CommandParser *parser) {
+  free(parser->input);
   return 0;
 }
 
@@ -28,47 +35,49 @@ int is_space(char c) {
   }
 }
 
-void command_parser_inc(struct CommandParser *parser) {
-  parser->offset++;
-  parser->next = parser->input[parser->offset];
+void command_parser_append(struct CommandParser *parser, char c) {
+  parser->output[0] = c;
+  parser->output++;
 }
 
-// TODO: single quoted strings are concatonated into a single arg (without the args).
-//       this means we can't point back into the original strings like we're doing now.
 int command_parser_next(struct CommandParser *parser) {
   // skip whitespace
-  while (is_space(parser->next)) {
-    command_parser_inc(parser);
+  while (is_space(parser->next[0])) {
+    parser->next++;
   }
   // check for EOF
-  if (parser->next == 0) {
+  if (parser->next[0] == 0) {
     parser->arg = NULL;
     return 0;
   }
   // parse single quote
-  if (parser->next == '\'') {
-    command_parser_inc(parser);
-    if (parser->next == 0) {
+  if (parser->next[0] == '\'') {
+    // skip the opening quote
+    parser->next++;
+    if (parser->next[0] == 0) {
       return 1;
     }
-    parser->arg = parser->input + parser->offset;
-    while (parser->next != '\'' && parser->next != 0) {
-      command_parser_inc(parser);
+    parser->arg = parser->output;
+    while (parser->next[0] != '\'' && parser->next[0] != 0) {
+      command_parser_append(parser, parser->next[0]);
+      parser->next++;
     }
-    if (parser->next == 0) {
+    if (parser->next[0] == 0) {
       return 1;
     }
-    parser->input[parser->offset] = 0;
-    command_parser_inc(parser);
+    parser->next++;
+    // null terminator
+    command_parser_append(parser, 0);
   } else {
     // remember the start of the next arg
-    parser->arg = parser->input + parser->offset;
+    parser->arg = parser->output;
     // go forward until we hit a space or EOF
-    while (!is_space(parser->next) && parser->next != 0) {
-      command_parser_inc(parser);
+    while (!is_space(parser->next[0]) && parser->next[0] != 0) {
+      command_parser_append(parser, parser->next[0]);
+      parser->next++;
     }
-    // add the null terminator
-    parser->input[parser->offset] = 0;
+    // null terminator
+    command_parser_append(parser, 0);
   }
   return 0;
 }
@@ -86,6 +95,7 @@ int command_parse(struct Command *command, char *input) {
   command->narg = 0;
   while (1) {
     if (command_parser_next(&parser) != 0) {
+      command_parser_free(&parser);
       return 1;
     }
     command->argv[command->narg] = parser.arg;
@@ -94,7 +104,7 @@ int command_parse(struct Command *command, char *input) {
     }
     command->narg++;
   }
-  return 0;
+  return command_parser_free(&parser);
 }
 
 int command_print(struct Command *command) {
