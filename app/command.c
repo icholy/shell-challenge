@@ -41,12 +41,13 @@ void command_parser_append(struct CommandParser *parser, char c) {
 }
 
 int command_parse_quote(struct CommandParser *parser) {
+  char quote = parser->next[0];
   // skip the opening quote
   parser->next++;
   if (parser->next[0] == 0) {
     return 1;
   }
-  while (parser->next[0] != '\'' && parser->next[0] != 0) {
+  while (parser->next[0] != quote && parser->next[0] != 0) {
     command_parser_append(parser, parser->next[0]);
     parser->next++;
   }
@@ -72,7 +73,7 @@ int command_parser_next(struct CommandParser *parser) {
   // go forward until we hit a space or EOF
   while (!is_space(parser->next[0]) && parser->next[0] != 0) {
     // parse single quote
-    if (parser->next[0] == '\'') {
+    if (parser->next[0] == '\'' || parser->next[0] == '"') {
       if (command_parse_quote(parser) != 0) {
         return 1;
       }
