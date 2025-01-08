@@ -69,14 +69,14 @@ int command_parser_next(struct CommandParser *parser) {
   }
   // remember the start of the next arg
   parser->arg = parser->output;
-  // parse single quote
-  if (parser->next[0] == '\'') {
-    if (command_parse_quote(parser) != 0) {
-      return 1;
-    }
-  } else {
-    // go forward until we hit a space or EOF
-    while (!is_space(parser->next[0]) && parser->next[0] != 0) {
+  // go forward until we hit a space or EOF
+  while (!is_space(parser->next[0]) && parser->next[0] != 0) {
+    // parse single quote
+    if (parser->next[0] == '\'') {
+      if (command_parse_quote(parser) != 0) {
+        return 1;
+      }
+    } else {
       command_parser_append(parser, parser->next[0]);
       parser->next++;
     }
