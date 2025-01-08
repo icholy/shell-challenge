@@ -1,8 +1,8 @@
 #include "command.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 struct CommandParser {
   char *next;
@@ -40,6 +40,23 @@ void command_parser_append(struct CommandParser *parser, char c) {
   parser->output++;
 }
 
+int command_parse_quote(struct CommandParser *parser) {
+  // skip the opening quote
+  parser->next++;
+  if (parser->next[0] == 0) {
+    return 1;
+  }
+  while (parser->next[0] != '\'' && parser->next[0] != 0) {
+    command_parser_append(parser, parser->next[0]);
+    parser->next++;
+  }
+  if (parser->next[0] == 0) {
+    return 1;
+  }
+  parser->next++;
+  return 0;
+}
+
 int command_parser_next(struct CommandParser *parser) {
   // skip whitespace
   while (is_space(parser->next[0])) {
@@ -50,35 +67,22 @@ int command_parser_next(struct CommandParser *parser) {
     parser->arg = NULL;
     return 0;
   }
+  // remember the start of the next arg
+  parser->arg = parser->output;
   // parse single quote
   if (parser->next[0] == '\'') {
-    // skip the opening quote
-    parser->next++;
-    if (parser->next[0] == 0) {
+    if (command_parse_quote(parser) != 0) {
       return 1;
     }
-    parser->arg = parser->output;
-    while (parser->next[0] != '\'' && parser->next[0] != 0) {
-      command_parser_append(parser, parser->next[0]);
-      parser->next++;
-    }
-    if (parser->next[0] == 0) {
-      return 1;
-    }
-    parser->next++;
-    // null terminator
-    command_parser_append(parser, 0);
   } else {
-    // remember the start of the next arg
-    parser->arg = parser->output;
     // go forward until we hit a space or EOF
     while (!is_space(parser->next[0]) && parser->next[0] != 0) {
       command_parser_append(parser, parser->next[0]);
       parser->next++;
     }
-    // null terminator
-    command_parser_append(parser, 0);
   }
+  // null terminator
+  command_parser_append(parser, 0);
   return 0;
 }
 
