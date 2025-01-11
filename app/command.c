@@ -17,7 +17,6 @@ int command_parse(struct Command *command, char *input) {
 }
 
 int command_print(struct Command *command) {
-  printf("Args: %s\n", command->name);
   printf("Args:\n");
   for (size_t i = 1; i < command->narg; i++) {
     printf("- %s\n", command->argv[i]);
