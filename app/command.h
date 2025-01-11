@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 struct Command {
-  char *name;
+  const char *name;
   char *argv[100];
   size_t narg;
 };

@@ -7,7 +7,7 @@ int command_parse(struct Command *command, char *input) {
   if (args_parse(&args, input) != 0) {
     return 1;
   }
-  command->name = args.name;
+  command->name = args_nth(&args, 0);
   command->narg = args.narg;
   *command->argv = *args.argv;
   return 0;

@@ -133,7 +133,6 @@ int args_parse(struct Args *args, char *input) {
   if (args_parser_init(&parser, input) != 0) {
     return 1;
   }
-  args->name = input;
   args->narg = 0;
   while (1) {
     if (args_parser_next(&parser) != 0) {

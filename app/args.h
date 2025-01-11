@@ -4,7 +4,6 @@
 #include <stddef.h>
 
 struct Args {
-  char *name;
   char *argv[100];
   size_t narg;
 };
