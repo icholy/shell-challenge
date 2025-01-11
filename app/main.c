@@ -138,7 +138,7 @@ int main() {
             printf("failed to open file: %s\n", command.redirect);
             return 1;
           }
-          if (dup2(fd, 1) != 0) {
+          if (dup2(fd, 1) < 0) {
             printf("failed to redirect stdout: %s\n", command.redirect);
             return 1;
           }
