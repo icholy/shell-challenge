@@ -9,7 +9,9 @@ int command_parse(struct Command *command, char *input) {
   }
   command->name = args_nth(&args, 0);
   command->narg = args.narg;
-  *command->argv = *args.argv;
+  for (size_t i = 1; i <= command->narg; i++) {
+    command->argv[i] = args.argv[i];
+  }
   return 0;
 }
 
