@@ -169,10 +169,12 @@ int main() {
         redirect_fd = open(command.redirect, O_RDWR | O_CREAT, O_APPEND,
                            S_IRUSR | S_IWUSR);
       } else {
-        redirect_fd = open(command.redirect, O_RDWR | O_CREAT, O_TRUNC,
-                           S_IRUSR | S_IWUSR);
+        redirect_fd =
+            open(command.redirect, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
       }
       if (redirect_fd == -1) {
+        // get more error details
+        perror("open");
         fprintf(stderr, "failed to open file: %s\n", command.redirect);
         return 1;
       }
