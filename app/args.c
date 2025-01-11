@@ -1,17 +1,17 @@
-#include "command.h"
+#include "args.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-struct CommandParser {
+struct ArgsParser {
   char *next;
   char *input;
   char *output;
   char *arg;
 };
 
-int command_parser_init(struct CommandParser *parser, char *input) {
+int args_parser_init(struct ArgsParser *parser, char *input) {
   parser->input = strdup(input);
   parser->next = parser->input;
   parser->output = input;
@@ -19,7 +19,7 @@ int command_parser_init(struct CommandParser *parser, char *input) {
   return 0;
 }
 
-int command_parser_free(struct CommandParser *parser) {
+int args_parser_free(struct ArgsParser *parser) {
   free(parser->input);
   return 0;
 }
@@ -35,26 +35,26 @@ int is_space(char c) {
   }
 }
 
-void command_parser_append(struct CommandParser *parser, char c) {
+void args_parser_append(struct ArgsParser *parser, char c) {
   parser->output[0] = c;
   parser->output++;
 }
 
 bool is_digit(char c) { return c >= '0' && c <= '9'; }
 
-int command_parser_escaped(struct CommandParser *parser, bool double_quote) {
+int args_parser_escaped(struct ArgsParser *parser, bool double_quote) {
   parser->next++; // skip the forward slash
   if (parser->next[0] == 0) {
     return 1;
   }
   if (!double_quote || parser->next[0] != '"') {
-    command_parser_append(parser, '\\');
+    args_parser_append(parser, '\\');
   }
-  command_parser_append(parser, '"');
+  args_parser_append(parser, '"');
   return 0;
 }
 
-int command_parse_quote(struct CommandParser *parser) {
+int args_parse_quote(struct ArgsParser *parser) {
   char quote = parser->next[0];
   // skip the opening quote
   parser->next++;
@@ -69,13 +69,13 @@ int command_parse_quote(struct CommandParser *parser) {
         return 1;
       }
       if (quote != '"' || (parser->next[0] != '"' && parser->next[0] != '$' && parser->next[0] != '\\')) {
-        command_parser_append(parser, '\\');
+        args_parser_append(parser, '\\');
       }
-      command_parser_append(parser, parser->next[0]);
+      args_parser_append(parser, parser->next[0]);
       parser->next++;
       continue;
     }
-    command_parser_append(parser, parser->next[0]);
+    args_parser_append(parser, parser->next[0]);
     parser->next++;
   }
   if (parser->next[0] == 0) {
@@ -85,7 +85,7 @@ int command_parse_quote(struct CommandParser *parser) {
   return 0;
 }
 
-int command_parser_next(struct CommandParser *parser) {
+int args_parser_next(struct ArgsParser *parser) {
   // skip whitespace
   while (is_space(parser->next[0])) {
     parser->next++;
@@ -105,63 +105,63 @@ int command_parser_next(struct CommandParser *parser) {
       if (parser->next[0] == 0) {
         return 1;
       }
-      command_parser_append(parser, parser->next[0]);
+      args_parser_append(parser, parser->next[0]);
       parser->next++;
       continue;
     }
     // parse quoted string
     if (parser->next[0] == '\'' || parser->next[0] == '"') {
-      if (command_parse_quote(parser) != 0) {
+      if (args_parse_quote(parser) != 0) {
         return 1;
       }
       continue;
     }
-    command_parser_append(parser, parser->next[0]);
+    args_parser_append(parser, parser->next[0]);
     parser->next++;
   }
   // null terminator
-  command_parser_append(parser, 0);
+  args_parser_append(parser, 0);
   return 0;
 }
 
 /**
- * Parse a space separate command line.
+ * Parse a space separate args line.
  * This function modifies the input string.
  */
-int command_parse(struct Command *command, char *input) {
-  struct CommandParser parser;
-  if (command_parser_init(&parser, input) != 0) {
+int args_parse(struct Args *args, char *input) {
+  struct ArgsParser parser;
+  if (args_parser_init(&parser, input) != 0) {
     return 1;
   }
-  command->name = input;
-  command->narg = 0;
+  args->name = input;
+  args->narg = 0;
   while (1) {
-    if (command_parser_next(&parser) != 0) {
-      command_parser_free(&parser);
+    if (args_parser_next(&parser) != 0) {
+      args_parser_free(&parser);
       return 1;
     }
-    command->argv[command->narg] = parser.arg;
+    args->argv[args->narg] = parser.arg;
     if (parser.arg == NULL) {
       break;
     }
-    command->narg++;
+    args->narg++;
   }
-  return command_parser_free(&parser);
+  return args_parser_free(&parser);
 }
 
-int command_print(struct Command *command) {
-  printf("Command: %s\n", command->name);
+int args_print(struct Args *args) {
+  printf("Args: %s\n", args->name);
   printf("Args:\n");
-  for (size_t i = 1; i < command->narg; i++) {
-    printf("- %s\n", command->argv[i]);
+  for (size_t i = 1; i < args->narg; i++) {
+    printf("- %s\n", args->argv[i]);
   }
   return 0;
 }
 
-const char *command_arg(struct Command *command, size_t n) {
+const char *args_nth(struct Args *args, size_t n) {
   n++;
-  if (n >= command->narg || n <= 0) {
+  if (n >= args->narg || n <= 0) {
     return "";
   }
-  return command->argv[n];
+  return args->argv[n];
 }
