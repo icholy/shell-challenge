@@ -101,7 +101,7 @@ int command_parser_next(struct CommandParser *parser) {
       if (parser->next[0] == 0) {
         return 1;
       }
-      command_parser_append(parser, command_parser_escape(parser->next[0]));
+      command_parser_append(parser, parser->next[0]);
       parser->next++;
       continue;
     }
