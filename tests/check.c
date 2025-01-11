@@ -85,6 +85,18 @@ START_TEST(command_parse_special_paths) {
 }
 END_TEST
 
+START_TEST(command_parse_mixed_quotes_escape) {
+  struct Command command;
+  char *input = strdup("echo \"world'test'\\n'shell\" \"example'hello'\\\\n'shell\"");
+  command_parse(&command, input);
+  ck_assert_int_eq(command.narg, 3);
+  ck_assert_str_eq(command.name, "echo");
+  ck_assert_str_eq(command_arg(&command, 0), "world'test'\\n'shell");
+  ck_assert_str_eq(command_arg(&command, 1), "example'hello'\\n'shell");
+  free(input);
+}
+END_TEST
+
 Suite *test_suite(void) {
   Suite *s = suite_create("Shell");
 
@@ -99,6 +111,7 @@ Suite *test_suite(void) {
   tcase_add_test(tc_command, command_parse_escaped_chars_unquoted);
   tcase_add_test(tc_command, command_parse_escaped_chars_quoted);
   tcase_add_test(tc_command, command_parse_special_paths);
+  tcase_add_test(tc_command, command_parse_mixed_quotes_escape);
   suite_add_tcase(s, tc_command);
 
   return s;
