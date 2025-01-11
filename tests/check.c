@@ -60,17 +60,17 @@ START_TEST(command_parse_escaped_chars_unquoted) {
 }
 END_TEST
 
-/*START_TEST(command_parse_escaped_chars_quoted) {*/
-/*  struct Command command;*/
-/*  char *input = strdup("echo \"hello\\\"world\" 'test\\'s\\\"quoted\\\"'");*/
-/*  command_parse(&command, input);*/
-/*  ck_assert_int_eq(command.narg, 3);*/
-/*  ck_assert_str_eq(command.name, "echo");*/
-/*  ck_assert_str_eq(command_arg(&command, 0), "hello\"world");*/
-/*  ck_assert_str_eq(command_arg(&command, 1), "test's\"quoted\"");*/
-/*  free(input);*/
-/*}*/
-/*END_TEST*/
+START_TEST(command_parse_escaped_chars_quoted) {
+  struct Command command;
+  char *input = strdup("echo \"hello\\\"world\" 'test\\'s\\\"quoted\\\"'");
+  command_parse(&command, input);
+  ck_assert_int_eq(command.narg, 3);
+  ck_assert_str_eq(command.name, "echo");
+  ck_assert_str_eq(command_arg(&command, 0), "hello\"world");
+  ck_assert_str_eq(command_arg(&command, 1), "test's\"quoted\"");
+  free(input);
+}
+END_TEST
 
 Suite *test_suite(void) {
   Suite *s = suite_create("Shell");
@@ -84,7 +84,7 @@ Suite *test_suite(void) {
   tcase_add_test(tc_command, command_parse_single_quote);
   tcase_add_test(tc_command, command_parse_double_quote);
   tcase_add_test(tc_command, command_parse_escaped_chars_unquoted);
-  // tcase_add_test(tc_command, command_parse_escaped_chars_quoted);
+  tcase_add_test(tc_command, command_parse_escaped_chars_quoted);
   suite_add_tcase(s, tc_command);
 
   return s;
