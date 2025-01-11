@@ -7,6 +7,7 @@ struct Command {
   const char *name;
   char *argv[100];
   size_t narg;
+  const char* redirect;
 };
 
 int command_parse(struct Command *command, char *input);
