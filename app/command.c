@@ -68,7 +68,7 @@ int command_parse_quote(struct CommandParser *parser) {
       if (parser->next[0] == 0) {
         return 1;
       }
-      if (quote != '"' || parser->next[0] != '"') {
+      if (quote != '"' || (parser->next[0] != '"' && parser->next[0] != '$' && parser->next[0] != '\\')) {
         command_parser_append(parser, '\\');
       }
       command_parser_append(parser, parser->next[0]);
