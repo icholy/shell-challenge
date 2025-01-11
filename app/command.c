@@ -1,6 +1,7 @@
 #include "command.h"
 #include "args.h"
 #include <stdio.h>
+#include <string.h>
 
 int command_parse(struct Command *command, char *input) {
   struct Args args;
@@ -8,11 +9,17 @@ int command_parse(struct Command *command, char *input) {
     return 1;
   }
   command->name = args_nth(&args, 0);
-  command->narg = args.narg;
-  for (size_t i = 0; i <= command->narg; i++) {
-    command->argv[i] = args.argv[i];
-  }
   command->redirect = NULL;
+  command->narg = 0;
+  for (size_t i = 0; i < args.narg; i++) {
+    if (strcmp(args.argv[i], "1>") == 0 || strcmp(args.argv[i], ">") == 0) {
+      command->redirect = args.argv[i+1];
+      break;
+    }
+    command->argv[i] = args.argv[i];
+    command->narg++;
+  }
+  command->argv[command->narg] = NULL;
   return 0;
 }
 
