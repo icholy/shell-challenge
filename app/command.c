@@ -48,6 +48,13 @@ int command_parse_quote(struct CommandParser *parser) {
     return 1;
   }
   while (parser->next[0] != quote && parser->next[0] != 0) {
+    // handle escaping
+    if (parser->next[0] == '\\') {
+      parser->next++;
+      if (parser->next[0] == 0) {
+        return 1;
+      }
+    }
     command_parser_append(parser, parser->next[0]);
     parser->next++;
   }
