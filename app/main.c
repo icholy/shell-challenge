@@ -145,6 +145,7 @@ int main() {
         }
         if (execve(bin_path, command.argv, NULL) != 0) {
           printf("failed to execute: %s\n", command.name);
+          return 1;
         }
       }
       continue;
