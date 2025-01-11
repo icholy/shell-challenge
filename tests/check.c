@@ -17,8 +17,8 @@ START_TEST(args_parse_simple) {
   struct Args args;
   char *input = strdup("cd /tmp");
   args_parse(&args, input);
-  ck_assert_str_eq(args.name, "cd");
-  ck_assert_str_eq(args_nth(&args, 0), "/tmp");
+  ck_assert_str_eq(args_nth(&args, 0), "cd");
+  ck_assert_str_eq(args_nth(&args, 1), "/tmp");
   free(input);
 }
 END_TEST
@@ -28,9 +28,9 @@ START_TEST(args_parse_single_quote) {
   char *input = strdup("echo 'script     example' 'world''test'");
   args_parse(&args, input);
   ck_assert_int_eq(args.narg, 3);
-  ck_assert_str_eq(args.name, "echo");
-  ck_assert_str_eq(args_nth(&args, 0), "script     example");
-  ck_assert_str_eq(args_nth(&args, 1), "worldtest");
+  ck_assert_str_eq(args_nth(&args, 0), "echo");
+  ck_assert_str_eq(args_nth(&args, 1), "script     example");
+  ck_assert_str_eq(args_nth(&args, 2), "worldtest");
   free(input);
 }
 END_TEST
@@ -40,9 +40,9 @@ START_TEST(args_parse_double_quote) {
   char *input = strdup("echo \"hello    world\" \"another\"\"test\"");
   args_parse(&args, input);
   ck_assert_int_eq(args.narg, 3);
-  ck_assert_str_eq(args.name, "echo");
-  ck_assert_str_eq(args_nth(&args, 0), "hello    world");
-  ck_assert_str_eq(args_nth(&args, 1), "anothertest");
+  ck_assert_str_eq(args_nth(&args, 0), "echo");
+  ck_assert_str_eq(args_nth(&args, 1), "hello    world");
+  ck_assert_str_eq(args_nth(&args, 2), "anothertest");
   free(input);
 }
 END_TEST
@@ -52,10 +52,10 @@ START_TEST(args_parse_escaped_chars_unquoted) {
   char *input = strdup("echo hello\\ world file\\\"name file\\\'s");
   args_parse(&args, input);
   ck_assert_int_eq(args.narg, 4);
-  ck_assert_str_eq(args.name, "echo");
-  ck_assert_str_eq(args_nth(&args, 0), "hello world");
-  ck_assert_str_eq(args_nth(&args, 1), "file\"name");
-  ck_assert_str_eq(args_nth(&args, 2), "file's");
+  ck_assert_str_eq(args_nth(&args, 0), "echo");
+  ck_assert_str_eq(args_nth(&args, 1), "hello world");
+  ck_assert_str_eq(args_nth(&args, 2), "file\"name");
+  ck_assert_str_eq(args_nth(&args, 3), "file's");
   free(input);
 }
 END_TEST
@@ -65,9 +65,9 @@ START_TEST(args_parse_escaped_chars_quoted) {
   char *input = strdup("echo \"hello\\\"world\" 'tests\\\"quoted\\\"'");
   args_parse(&args, input);
   ck_assert_int_eq(args.narg, 3);
-  ck_assert_str_eq(args.name, "echo");
-  ck_assert_str_eq(args_nth(&args, 0), "hello\"world");
-  ck_assert_str_eq(args_nth(&args, 1), "tests\\\"quoted\\\"");
+  ck_assert_str_eq(args_nth(&args, 0), "echo");
+  ck_assert_str_eq(args_nth(&args, 1), "hello\"world");
+  ck_assert_str_eq(args_nth(&args, 2), "tests\\\"quoted\\\"");
   free(input);
 }
 END_TEST
@@ -77,10 +77,10 @@ START_TEST(args_parse_special_paths) {
   char *input = strdup("cat \"/tmp/quz/f\\n64\" \"/tmp/quz/f\\7\" \"/tmp/quz/f'\\\'19\"");
   args_parse(&args, input);
   ck_assert_int_eq(args.narg, 4);
-  ck_assert_str_eq(args.name, "cat");
-  ck_assert_str_eq(args_nth(&args, 0), "/tmp/quz/f\\n64");
-  ck_assert_str_eq(args_nth(&args, 1), "/tmp/quz/f\\7");
-  ck_assert_str_eq(args_nth(&args, 2), "/tmp/quz/f'\\'19");
+  ck_assert_str_eq(args_nth(&args, 0), "cat");
+  ck_assert_str_eq(args_nth(&args, 1), "/tmp/quz/f\\n64");
+  ck_assert_str_eq(args_nth(&args, 2), "/tmp/quz/f\\7");
+  ck_assert_str_eq(args_nth(&args, 3), "/tmp/quz/f'\\'19");
   free(input);
 }
 END_TEST
@@ -90,9 +90,9 @@ START_TEST(args_parse_mixed_quotes_escape) {
   char *input = strdup("echo \"world'test'\\n'shell\" \"example'hello'\\\\n'shell\"");
   args_parse(&args, input);
   ck_assert_int_eq(args.narg, 3);
-  ck_assert_str_eq(args.name, "echo");
-  ck_assert_str_eq(args_nth(&args, 0), "world'test'\\n'shell");
-  ck_assert_str_eq(args_nth(&args, 1), "example'hello'\\n'shell");
+  ck_assert_str_eq(args_nth(&args, 0), "echo");
+  ck_assert_str_eq(args_nth(&args, 1), "world'test'\\n'shell");
+  ck_assert_str_eq(args_nth(&args, 2), "example'hello'\\n'shell");
   free(input);
 }
 END_TEST

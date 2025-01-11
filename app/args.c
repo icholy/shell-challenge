@@ -150,17 +150,15 @@ int args_parse(struct Args *args, char *input) {
 }
 
 int args_print(struct Args *args) {
-  printf("Args: %s\n", args->name);
   printf("Args:\n");
-  for (size_t i = 1; i < args->narg; i++) {
+  for (size_t i = 0; i < args->narg; i++) {
     printf("- %s\n", args->argv[i]);
   }
   return 0;
 }
 
 const char *args_nth(struct Args *args, size_t n) {
-  n++;
-  if (n >= args->narg || n <= 0) {
+  if (n >= args->narg) {
     return "";
   }
   return args->argv[n];
