@@ -190,6 +190,11 @@ int main() {
     if (execute_command(stdout_fd, stderr_fd, &command, &env_path) != 0) {
       return 1;
     }
+
+    // cleanup the redirect file descriptor
+    if (command.redirect != NULL) {
+      close(redirect_fd);
+    }
   }
 
   return 0;
