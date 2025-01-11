@@ -109,14 +109,14 @@ int execute_command(int stdout_fd, int stderr_fd, struct Command *command,
     } else {
       if ((command->flags & SHELL_REDIRECT_STDOUT)) {
         if (dup2(stdout_fd, 1) < 0) {
-          dprintf(stderr_fd, "failed to redirect stdout: %s\n",
+          fprintf(stderr, "failed to redirect stdout: %s\n",
                   command->redirect);
           return 1;
         }
       }
       if ((command->flags & SHELL_REDIRECT_STDERR)) {
-        if (dup2(stdout_fd, 2) < 0) {
-          dprintf(stderr_fd, "failed to redirect stderr: %s\n",
+        if (dup2(stderr_fd, 2) < 0) {
+          fprintf(stderr, "failed to redirect stderr: %s\n",
                   command->redirect);
           return 1;
         }
