@@ -154,12 +154,24 @@ int main() {
     }
 
     // setup redirects
+    int redirect_fd;
     int stdout_fd = 1;
+    int stderr_fd = 2;
     if (command.redirect != NULL) {
-      stdout_fd = open(command.redirect, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-      if (stdout_fd == -1) {
+      if ((command.flags & SHELL_REDIRECT_APPEND) != 0) {
+        redirect_fd = open(command.redirect, O_RDWR | O_CREAT, O_APPEND, S_IRUSR | S_IWUSR);
+      } else {
+        redirect_fd = open(command.redirect, O_RDWR | O_CREAT, O_TRUNC, S_IRUSR | S_IWUSR);
+      }
+      if (redirect_fd == -1) {
         fprintf(stderr, "failed to open file: %s\n", command.redirect);
         return 1;
+      }
+      if ((command.flags & SHELL_REDIRECT_STDOUT) != 0) {
+        stdout_fd = redirect_fd;
+      }
+      if ((command.flags & SHELL_REDIRECT_STDERR) != 0) {
+        stderr_fd = redirect_fd;
       }
     }
 
@@ -169,7 +181,7 @@ int main() {
     }
 
     if (command.redirect != NULL) {
-      close(stdout_fd);
+      close(redirect_fd);
     }
   }
 

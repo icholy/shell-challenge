@@ -10,10 +10,27 @@ int command_parse(struct Command *command, char *input) {
   }
   command->name = args_nth(&args, 0);
   command->redirect = NULL;
+  command->flags = 0;
   command->narg = 0;
   for (size_t i = 0; i < args.narg; i++) {
     if (strcmp(args.argv[i], "1>") == 0 || strcmp(args.argv[i], ">") == 0) {
-      command->redirect = args.argv[i+1];
+      command->redirect = args.argv[i + 1];
+      command->flags = SHELL_REDIRECT_STDOUT;
+      break;
+    }
+    if (strcmp(args.argv[i], "1>>") == 0 || strcmp(args.argv[i], ">>") == 0) {
+      command->redirect = args.argv[i + 1];
+      command->flags = SHELL_REDIRECT_STDOUT | SHELL_REDIRECT_APPEND;
+      break;
+    }
+    if (strcmp(args.argv[i], "2>") == 0) {
+      command->redirect = args.argv[i + 1];
+      command->flags = SHELL_REDIRECT_STDERR;
+      break;
+    }
+    if (strcmp(args.argv[i], "2>>") == 0) {
+      command->redirect = args.argv[i + 1];
+      command->flags = SHELL_REDIRECT_STDERR | SHELL_REDIRECT_APPEND;
       break;
     }
     command->argv[i] = args.argv[i];
