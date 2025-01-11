@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -I./app
 LDFLAGS = -lcheck -lm -lsubunit
-SRC = app/args.c app/env_path.c
+SRC = app/args.c app/env_path.c app/command.c
 
 check:
 	$(CC) tests/*.c $(SRC) $(CFLAGS) $(LDFLAGS) -o test_runner
