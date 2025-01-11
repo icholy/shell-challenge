@@ -101,13 +101,13 @@ int execute_command(int stdout_fd, int stderr_fd, struct Command *command,
     if (child) {
       waitpid(child, NULL, 0);
     } else {
-      if ((command->flags & SHELL_REDIRECT_STDOUT)) {
+      if (command->flags & SHELL_REDIRECT_STDOUT) {
         if (dup2(stdout_fd, 1) < 0) {
           fprintf(stderr, "failed to redirect stdout: %s\n", command->redirect);
           return 1;
         }
       }
-      if ((command->flags & SHELL_REDIRECT_STDERR)) {
+      if (command->flags & SHELL_REDIRECT_STDERR) {
         if (dup2(stderr_fd, 2) < 0) {
           fprintf(stderr, "failed to redirect stderr: %s\n", command->redirect);
           return 1;
@@ -165,7 +165,7 @@ int main() {
     int stdout_fd = 1;
     int stderr_fd = 2;
     if (command.redirect != NULL) {
-      if ((command.flags & SHELL_REDIRECT_APPEND) != 0) {
+      if (command.flags & SHELL_REDIRECT_APPEND) {
         redirect_fd = open(command.redirect, O_RDWR | O_CREAT, O_APPEND,
                            S_IRUSR | S_IWUSR);
       } else {
@@ -176,21 +176,17 @@ int main() {
         fprintf(stderr, "failed to open file: %s\n", command.redirect);
         return 1;
       }
-      if ((command.flags & SHELL_REDIRECT_STDOUT) != 0) {
-        stdout_fd = redirect_fd;
-      }
-      if ((command.flags & SHELL_REDIRECT_STDERR) != 0) {
-        stderr_fd = redirect_fd;
-      }
+    }
+    if (command.flags & SHELL_REDIRECT_STDOUT) {
+      stdout_fd = redirect_fd;
+    }
+    if (command.flags & SHELL_REDIRECT_STDERR) {
+      stderr_fd = redirect_fd;
     }
 
     // execute the command
     if (execute_command(stdout_fd, stderr_fd, &command, &env_path) != 0) {
       return 1;
-    }
-
-    if (command.redirect != NULL) {
-      close(redirect_fd);
     }
   }
 
