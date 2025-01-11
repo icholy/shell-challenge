@@ -45,6 +45,16 @@ int command_print(struct Command *command) {
   for (size_t i = 0; i < command->narg; i++) {
     printf("- %s\n", command->argv[i]);
   }
+  printf("Flags:\n");
+  if (command->flags & SHELL_REDIRECT_STDOUT) {
+    printf("- SHELL_REDIRECT_STDOUT\n");
+  }
+  if (command->flags & SHELL_REDIRECT_STDERR) {
+    printf("- SHELL_REDIRECT_STDERR\n");
+  }
+  if (command->flags & SHELL_REDIRECT_APPEND) {
+    printf("- SHELL_REDIRECT_APPEND\n");
+  }
   if (command->redirect != NULL) {
     printf("Redirect: %s\n", command->redirect);
   }

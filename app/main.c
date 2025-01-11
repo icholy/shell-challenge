@@ -58,12 +58,6 @@ int execute_command(int stdout_fd, int stderr_fd, struct Command *command,
     return 0;
   }
 
-  // debug command
-  if (strcmp(command->name, "debug") == 0) {
-    command_print(command);
-    return 0;
-  }
-
   // type command
   if (strcmp(command->name, "type") == 0) {
     if (is_builtin(command_arg(command, 0))) {
@@ -109,15 +103,13 @@ int execute_command(int stdout_fd, int stderr_fd, struct Command *command,
     } else {
       if ((command->flags & SHELL_REDIRECT_STDOUT)) {
         if (dup2(stdout_fd, 1) < 0) {
-          fprintf(stderr, "failed to redirect stdout: %s\n",
-                  command->redirect);
+          fprintf(stderr, "failed to redirect stdout: %s\n", command->redirect);
           return 1;
         }
       }
       if ((command->flags & SHELL_REDIRECT_STDERR)) {
         if (dup2(stderr_fd, 2) < 0) {
-          fprintf(stderr, "failed to redirect stderr: %s\n",
-                  command->redirect);
+          fprintf(stderr, "failed to redirect stderr: %s\n", command->redirect);
           return 1;
         }
       }
@@ -159,6 +151,12 @@ int main() {
     struct Command command;
     if (command_parse(&command, input) != 0) {
       fprintf(stderr, "failed to parse command\n");
+      continue;
+    }
+
+    // debug command
+    if (strcmp(command.name, "debug") == 0) {
+      command_print(&command);
       continue;
     }
 
