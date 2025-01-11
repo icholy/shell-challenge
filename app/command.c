@@ -72,15 +72,25 @@ int command_parser_next(struct CommandParser *parser) {
   parser->arg = parser->output;
   // go forward until we hit a space or EOF
   while (!is_space(parser->next[0]) && parser->next[0] != 0) {
-    // parse single quote
+    // handle escaping
+    if (parser->next[0] == '\\') {
+      parser->next++;
+      if (parser->next[0] == 0) {
+        return 1;
+      }
+      command_parser_append(parser, parser->next[0]);
+      parser->next++;
+      continue;
+    }
+    // parse quoted string
     if (parser->next[0] == '\'' || parser->next[0] == '"') {
       if (command_parse_quote(parser) != 0) {
         return 1;
       }
-    } else {
-      command_parser_append(parser, parser->next[0]);
-      parser->next++;
+      continue;
     }
+    command_parser_append(parser, parser->next[0]);
+    parser->next++;
   }
   // null terminator
   command_parser_append(parser, 0);
