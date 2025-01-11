@@ -38,7 +38,7 @@ int is_builtin(const char *name) {
   return 0;
 }
 
-int execute_command(struct Command *command, struct EnvPath *env_path) {
+int execute_command(int stdout_fd, struct Command *command, struct EnvPath *env_path) {
 
   // exit command
   if (strcmp(command->name, "exit") == 0) {
@@ -49,11 +49,11 @@ int execute_command(struct Command *command, struct EnvPath *env_path) {
   if (strcmp(command->name, "echo") == 0) {
     for (size_t i = 0; i < command->narg - 1; i++) {
       if (i > 0) {
-        printf(" ");
+        dprintf(stdout_fd, " ");
       }
-      printf("%s", command_arg(command, i));
+      dprintf(stdout_fd, "%s", command_arg(command, i));
     }
-    printf("\n");
+    dprintf(stdout_fd, "\n");
     return 0;
   }
 
@@ -66,17 +66,17 @@ int execute_command(struct Command *command, struct EnvPath *env_path) {
   // type command
   if (strcmp(command->name, "type") == 0) {
     if (is_builtin(command_arg(command, 0))) {
-      printf("%s is a shell builtin\n", command_arg(command, 0));
+      dprintf(stdout_fd, "%s is a shell builtin\n", command_arg(command, 0));
       return 0;
     }
 
     char bin_path[4096];
     if (env_path_find(env_path, command_arg(command, 0), bin_path) == 0) {
-      printf("%s is %s\n", command_arg(command, 0), bin_path);
+      dprintf(stdout_fd, "%s is %s\n", command_arg(command, 0), bin_path);
       return 0;
     }
 
-    printf("%s: not found\n", command_arg(command, 0));
+    fprintf(stderr, "%s: not found\n", command_arg(command, 0));
     return 0;
   }
 
@@ -84,7 +84,7 @@ int execute_command(struct Command *command, struct EnvPath *env_path) {
   if (strcmp(command->name, "pwd") == 0) {
     char buf[PATH_MAX];
     char *cwd = getcwd(buf, PATH_MAX);
-    printf("%s\n", cwd);
+    dprintf(stdout_fd, "%s\n", cwd);
     return 0;
   }
 
@@ -95,7 +95,7 @@ int execute_command(struct Command *command, struct EnvPath *env_path) {
       dir = gethomedir();
     }
     if (chdir(dir) != 0) {
-      printf("cd: %s: No such file or directory\n", dir);
+      fprintf(stderr, "cd: %s: No such file or directory\n", dir);
     }
     return 0;
   }
@@ -107,18 +107,13 @@ int execute_command(struct Command *command, struct EnvPath *env_path) {
       waitpid(child, NULL, 0);
     } else {
       if (command->redirect != NULL) {
-        int fd = open(command->redirect, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-        if (fd == -1) {
-          printf("failed to open file: %s\n", command->redirect);
-          return 1;
-        }
-        if (dup2(fd, 1) < 0) {
-          printf("failed to redirect stdout: %s\n", command->redirect);
+        if (dup2(stdout_fd, 1) < 0) {
+          fprintf(stderr, "failed to redirect stdout: %s\n", command->redirect);
           return 1;
         }
       }
       if (execve(bin_path, command->argv, NULL) != 0) {
-        printf("failed to execute: %s\n", command->name);
+        fprintf(stderr, "failed to execute: %s\n", command->name);
         return 1;
       }
     }
@@ -126,7 +121,7 @@ int execute_command(struct Command *command, struct EnvPath *env_path) {
   }
 
   // print error
-  printf("%s: command not found\n", command->name);
+  fprintf(stderr, "%s: command not found\n", command->name);
   return 0;
 }
 
@@ -158,9 +153,23 @@ int main() {
       continue;
     }
 
+    // setup redirects
+    int stdout_fd = 1;
+    if (command.redirect != NULL) {
+      stdout_fd = open(command.redirect, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+      if (stdout_fd == -1) {
+        fprintf(stderr, "failed to open file: %s\n", command.redirect);
+        return 1;
+      }
+    }
+
     // execute the command
-    if (execute_command(&command, &env_path) != 0) {
+    if (execute_command(stdout_fd, &command, &env_path) != 0) {
       return 1;
+    }
+
+    if (command.redirect != NULL) {
+      close(stdout_fd);
     }
   }
 
