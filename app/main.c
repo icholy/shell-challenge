@@ -38,7 +38,8 @@ int is_builtin(const char *name) {
   return 0;
 }
 
-int execute_command(int stdout_fd, struct Command *command, struct EnvPath *env_path) {
+int execute_command(int stdout_fd, int stderr_fd, struct Command *command,
+                    struct EnvPath *env_path) {
 
   // exit command
   if (strcmp(command->name, "exit") == 0) {
@@ -76,7 +77,7 @@ int execute_command(int stdout_fd, struct Command *command, struct EnvPath *env_
       return 0;
     }
 
-    fprintf(stderr, "%s: not found\n", command_arg(command, 0));
+    dprintf(stderr_fd, "%s: not found\n", command_arg(command, 0));
     return 0;
   }
 
@@ -95,7 +96,7 @@ int execute_command(int stdout_fd, struct Command *command, struct EnvPath *env_
       dir = gethomedir();
     }
     if (chdir(dir) != 0) {
-      fprintf(stderr, "cd: %s: No such file or directory\n", dir);
+      dprintf(stderr_fd, "cd: %s: No such file or directory\n", dir);
     }
     return 0;
   }
@@ -106,14 +107,22 @@ int execute_command(int stdout_fd, struct Command *command, struct EnvPath *env_
     if (child) {
       waitpid(child, NULL, 0);
     } else {
-      if (command->redirect != NULL) {
+      if ((command->flags & SHELL_REDIRECT_STDOUT)) {
         if (dup2(stdout_fd, 1) < 0) {
-          fprintf(stderr, "failed to redirect stdout: %s\n", command->redirect);
+          dprintf(stderr_fd, "failed to redirect stdout: %s\n",
+                  command->redirect);
+          return 1;
+        }
+      }
+      if ((command->flags & SHELL_REDIRECT_STDERR)) {
+        if (dup2(stdout_fd, 2) < 0) {
+          dprintf(stderr_fd, "failed to redirect stderr: %s\n",
+                  command->redirect);
           return 1;
         }
       }
       if (execve(bin_path, command->argv, NULL) != 0) {
-        fprintf(stderr, "failed to execute: %s\n", command->name);
+        dprintf(stderr_fd, "failed to execute: %s\n", command->name);
         return 1;
       }
     }
@@ -121,7 +130,7 @@ int execute_command(int stdout_fd, struct Command *command, struct EnvPath *env_
   }
 
   // print error
-  fprintf(stderr, "%s: command not found\n", command->name);
+  dprintf(stderr_fd, "%s: command not found\n", command->name);
   return 0;
 }
 
@@ -159,9 +168,11 @@ int main() {
     int stderr_fd = 2;
     if (command.redirect != NULL) {
       if ((command.flags & SHELL_REDIRECT_APPEND) != 0) {
-        redirect_fd = open(command.redirect, O_RDWR | O_CREAT, O_APPEND, S_IRUSR | S_IWUSR);
+        redirect_fd = open(command.redirect, O_RDWR | O_CREAT, O_APPEND,
+                           S_IRUSR | S_IWUSR);
       } else {
-        redirect_fd = open(command.redirect, O_RDWR | O_CREAT, O_TRUNC, S_IRUSR | S_IWUSR);
+        redirect_fd = open(command.redirect, O_RDWR | O_CREAT, O_TRUNC,
+                           S_IRUSR | S_IWUSR);
       }
       if (redirect_fd == -1) {
         fprintf(stderr, "failed to open file: %s\n", command.redirect);
@@ -176,7 +187,7 @@ int main() {
     }
 
     // execute the command
-    if (execute_command(stdout_fd, &command, &env_path) != 0) {
+    if (execute_command(stdout_fd, stderr_fd, &command, &env_path) != 0) {
       return 1;
     }
 
