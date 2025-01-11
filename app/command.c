@@ -42,38 +42,15 @@ void command_parser_append(struct CommandParser *parser, char c) {
 
 bool is_digit(char c) { return c >= '0' && c <= '9'; }
 
-int command_parser_escaped(struct CommandParser *parser) {
-  char c = parser->next[0];
-  if (c == 0) {
+int command_parser_escaped(struct CommandParser *parser, bool double_quote) {
+  parser->next++; // skip the forward slash
+  if (parser->next[0] == 0) {
     return 1;
   }
-  parser->next++;
-  switch (c) {
-  case 'n':
-    command_parser_append(parser, '\n');
-    break;
-  case 't':
-    command_parser_append(parser, '\t');
-    break;
-  case 'r':
-    command_parser_append(parser, '\r');
-    break;
-  default:
-    if (is_digit(c)) {
-      char octal = 0;
-      for (int i = 0; i < 3; i++) {
-        if (!is_digit(parser->next[0])) {
-          break;
-        }
-        char digit = parser->next[0] - '0';
-        octal = (octal * 8) + digit;
-        parser->next++;
-      }
-      command_parser_append(parser, octal);
-    } else {
-      command_parser_append(parser, c);
-    }
+  if (!double_quote || parser->next[0] != '"') {
+    command_parser_append(parser, '\\');
   }
+  command_parser_append(parser, '"');
   return 0;
 }
 
@@ -91,7 +68,11 @@ int command_parse_quote(struct CommandParser *parser) {
       if (parser->next[0] == 0) {
         return 1;
       }
-      command_parser_escaped(parser);
+      if (quote != '"' || parser->next[0] != '"') {
+        command_parser_append(parser, '\\');
+      }
+      command_parser_append(parser, parser->next[0]);
+      parser->next++;
       continue;
     }
     command_parser_append(parser, parser->next[0]);
