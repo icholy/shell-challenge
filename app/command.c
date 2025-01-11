@@ -40,6 +40,8 @@ void command_parser_append(struct CommandParser *parser, char c) {
   parser->output++;
 }
 
+bool is_digit(char c) { return c >= '0' && c <= '9'; }
+
 int command_parser_escaped(struct CommandParser *parser) {
   char c = parser->next[0];
   if (c == 0) {
@@ -56,21 +58,21 @@ int command_parser_escaped(struct CommandParser *parser) {
   case 'r':
     command_parser_append(parser, '\r');
     break;
-  case '0':
-  case '1':
-  case '2':
-  case '3':
-  case '4':
-  case '5':
-  case '6':
-  case '7':
-  case '8':
-  case '9':
-    command_parser_append(parser, c - '0');
-    break;
   default:
-    command_parser_append(parser, c);
-    break;
+    if (is_digit(c)) {
+      char octal = 0;
+      for (int i = 0; i < 3; i++) {
+        if (!is_digit(parser->next[0])) {
+          break;
+        }
+        char digit = parser->next[0] - '0';
+        octal = (octal * 8) + digit;
+        parser->next++;
+      }
+      command_parser_append(parser, octal);
+    } else {
+      command_parser_append(parser, c);
+    }
   }
   return 0;
 }
