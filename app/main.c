@@ -160,7 +160,7 @@ int main() {
 
     // execute the command
     if (execute_command(&command, &env_path) != 0) {
-      return 0;
+      return 1;
     }
   }
 
