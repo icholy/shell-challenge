@@ -79,7 +79,7 @@ START_TEST(command_parse_special_paths) {
   ck_assert_int_eq(command.narg, 4);
   ck_assert_str_eq(command.name, "cat");
   ck_assert_str_eq(command_arg(&command, 0), "/tmp/quz/f\n64");
-  // ck_assert_str_eq(command_arg(&command, 1), "/tmp/quz/f\7");
+  ck_assert_str_eq(command_arg(&command, 1), "/tmp/quz/f\7");
   // ck_assert_str_eq(command_arg(&command, 2), "/tmp/quz/f'\\'19");
   free(input);
 }
