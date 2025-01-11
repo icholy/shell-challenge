@@ -166,11 +166,11 @@ int main() {
     int stderr_fd = 2;
     if (command.redirect != NULL) {
       if (command.flags & SHELL_REDIRECT_APPEND) {
-        redirect_fd = open(command.redirect, O_RDWR | O_CREAT | O_APPEND,
-                           S_IRUSR | S_IWUSR);
+        redirect_fd = open(command.redirect, O_WRONLY | O_CREAT | O_APPEND,
+                           S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
       } else {
-        redirect_fd = open(command.redirect, O_RDWR | O_CREAT | O_TRUNC,
-                           S_IRUSR | S_IWUSR);
+        redirect_fd = open(command.redirect, O_WRONLY | O_CREAT | O_TRUNC,
+                           S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
       }
       if (redirect_fd == -1) {
         // get more error details
