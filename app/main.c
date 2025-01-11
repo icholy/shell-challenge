@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 const char *gethomedir() {
   const char *dir = getenv("HOME");
@@ -132,6 +133,17 @@ int main() {
       if (child) {
         waitpid(child, NULL, 0);
       } else {
+        if (command.redirect != NULL) {
+          int fd = open(command.redirect, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+          if (fd == -1) {
+            printf("failed to open file: %s\n", command.redirect);
+            return 1;
+          }
+          if (dup2(fd, 1) != 0) {
+            printf("failed to redirect stdout: %s\n", command.redirect);
+            return 1;
+          }
+        }
         if (execve(bin_path, command.argv, NULL) != 0) {
           printf("failed to execute: %s\n", command.name);
         }
