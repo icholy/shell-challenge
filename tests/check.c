@@ -110,6 +110,18 @@ START_TEST(command_parse_simple) {
 }
 END_TEST
 
+START_TEST(command_parse_redirect_stdout) {
+  struct Command command;
+  char *input = strdup("echo hello 1> /some/file");
+  command_parse(&command, input);
+  ck_assert_str_eq(command.name, "echo");
+  ck_assert_int_eq(command.narg, 2);
+  ck_assert_str_eq(command_arg(&command, 0), "hello");
+  ck_assert_str_eq(command.redirect, "/some/file");
+  free(input);
+}
+END_TEST
+
 Suite *test_suite(void) {
   Suite *s = suite_create("Shell");
 
@@ -125,12 +137,11 @@ Suite *test_suite(void) {
   tcase_add_test(tc_args, args_parse_escaped_chars_quoted);
   tcase_add_test(tc_args, args_parse_special_paths);
   tcase_add_test(tc_args, args_parse_mixed_quotes_escape);
-
   suite_add_tcase(s, tc_args);
 
   TCase *tc_command = tcase_create("Command");
   tcase_add_test(tc_command, command_parse_simple);
-
+  tcase_add_test(tc_command, command_parse_redirect_stdout);
   suite_add_tcase(s, tc_command);
 
   return s;
