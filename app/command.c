@@ -9,7 +9,7 @@ int command_parse(struct Command *command, char *input) {
   }
   command->name = args_nth(&args, 0);
   command->narg = args.narg;
-  for (size_t i = 1; i <= command->narg; i++) {
+  for (size_t i = 0; i <= command->narg; i++) {
     command->argv[i] = args.argv[i];
   }
   command->redirect = NULL;
@@ -18,7 +18,7 @@ int command_parse(struct Command *command, char *input) {
 
 int command_print(struct Command *command) {
   printf("Args:\n");
-  for (size_t i = 1; i < command->narg; i++) {
+  for (size_t i = 0; i < command->narg; i++) {
     printf("- %s\n", command->argv[i]);
   }
   if (command->redirect != NULL) {
