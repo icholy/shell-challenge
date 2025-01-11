@@ -40,17 +40,39 @@ void command_parser_append(struct CommandParser *parser, char c) {
   parser->output++;
 }
 
-char command_parser_escape(char c) {
+int command_parser_escaped(struct CommandParser *parser) {
+  char c = parser->next[0];
+  if (c == 0) {
+    return 1;
+  }
+  parser->next++;
   switch (c) {
   case 'n':
-    return '\n';
+    command_parser_append(parser, '\n');
+    break;
   case 't':
-    return '\t';
+    command_parser_append(parser, '\t');
+    break;
   case 'r':
-    return '\r';
+    command_parser_append(parser, '\r');
+    break;
+  case '0':
+  case '1':
+  case '2':
+  case '3':
+  case '4':
+  case '5':
+  case '6':
+  case '7':
+  case '8':
+  case '9':
+    command_parser_append(parser, c - '0');
+    break;
   default:
-    return c;
+    command_parser_append(parser, c);
+    break;
   }
+  return 0;
 }
 
 int command_parse_quote(struct CommandParser *parser) {
@@ -67,8 +89,7 @@ int command_parse_quote(struct CommandParser *parser) {
       if (parser->next[0] == 0) {
         return 1;
       }
-      command_parser_append(parser, command_parser_escape(parser->next[0]));
-      parser->next++;
+      command_parser_escaped(parser);
       continue;
     }
     command_parser_append(parser, parser->next[0]);
