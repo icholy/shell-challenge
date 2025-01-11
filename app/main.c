@@ -124,7 +124,6 @@ int main() {
         printf("cd: %s: No such file or directory\n", dir);
       }
       continue;
-      ;
     }
 
     char bin_path[4096];
